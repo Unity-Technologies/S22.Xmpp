@@ -1017,7 +1017,7 @@ namespace S22.Xmpp.Core {
 				} catch(OperationCanceledException) {
 					// Quit the task if it's been cancelled.
 					return;
-				} catch(Exception e) {
+				} catch(Exception) {
 					// FIXME: What should we do if an exception is thrown in one of the
 					// event handlers?
 				}

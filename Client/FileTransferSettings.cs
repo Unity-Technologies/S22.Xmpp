@@ -72,18 +72,6 @@ namespace S22.Xmpp.Client {
 		}
 
 		/// <summary>
-		/// Determines whether usage of UPnP for automatic port-forwarding is allowed.
-		/// </summary>
-		public bool UseUPnP {
-			get {
-				return socks5.UseUPnP;
-			}
-			set {
-				socks5.UseUPnP = value;
-			}
-		}
-
-		/// <summary>
 		/// The STUN server to use for determining the external IP address of the
 		/// XMPP client.
 		/// </summary>

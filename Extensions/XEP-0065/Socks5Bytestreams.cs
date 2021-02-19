@@ -13,7 +13,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using S22.Xmpp.Extensions.Upnp;
 
 namespace S22.Xmpp.Extensions {
 	/// <summary>
@@ -136,15 +135,6 @@ namespace S22.Xmpp.Extensions {
 		}
 
 		/// <summary>
-		/// Determines whether usage of UPnP for automatic port-forwarding is
-		/// allowed.
-		/// </summary>
-		public bool UseUPnP {
-			get;
-			set;
-		}
-
-		/// <summary>
 		/// The event that is raised whenever bytes have been transferred.
 		/// </summary>
 		public event EventHandler<BytesTransferredEventArgs> BytesTransferred;
@@ -219,7 +209,6 @@ namespace S22.Xmpp.Extensions {
 				StunServer = new DnsEndPoint("stun.l.google.com", 19302);
 				ProxyAllowed = true;
 				Proxies = new HashSet<Streamhost>();
-				UseUPnP = true;
 		}
 
 		/// <summary>
@@ -510,15 +499,6 @@ namespace S22.Xmpp.Extensions {
 			} catch {
 				// Fall through if server does not support the 'Server IP Check' extension.
 			}
-			// Next, try to retrieve external IP addresses from UPnP-enabled devices.
-			if (UseUPnP) {
-				try {
-					foreach (var address in UPnP.GetExternalAddresses())
-						set.Add(address);
-				} catch (Exception) {
-					// Fall through in case any device querying goes wrong.
-				}
-			}
 			// Finally, perform a STUN query.
 			try {
 				set.Add(StunClient.Query(StunServer.Host, StunServer.Port, 3000));
@@ -606,17 +586,7 @@ namespace S22.Xmpp.Extensions {
 			}
 			IEnumerable<IPAddress> externalAddresses = null;
 			try {
-				externalAddresses = GetExternalAddresses();
-				// Check if we might need to forward the server port.
-				if (externalAddresses.Any(addr => BehindNAT(addr)) && UseUPnP) {
-					try {
-						UPnP.ForwardPort(socks5Server.Port, ProtocolType.Tcp,
-							"XMPP SOCKS5 File-transfer");
-					} catch (InvalidOperationException) {
-						// If automatic port forwarding failed for whatever reason, just
-						// go on normally. The user can still configure forwarding manually.
-					}
-				}
+                externalAddresses = GetExternalAddresses();
 			} catch (NotSupportedException) {
 				// Not much we can do.
 			}
