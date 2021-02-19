@@ -436,9 +436,9 @@ namespace S22.Xmpp.Client {
 		/// is not a valid port number.</exception>
 		/// <remarks>Use this constructor if you wish to connect to an XMPP server using
 		/// an existing set of user credentials.</remarks>
-		public XmppClient(string hostname, string username, string password,
+		public XmppClient(string domain, string hostname, string username, string password,
 			int port = 5222, bool tls = true, RemoteCertificateValidationCallback validate = null) {
-				im = new XmppIm(hostname, username, password, port, tls, validate);
+				im = new XmppIm(domain, hostname, username, password, port, tls, validate);
 			// Initialize the various extension modules.
 			LoadExtensions();
 		}
@@ -461,9 +461,9 @@ namespace S22.Xmpp.Client {
 		/// is not a valid port number.</exception>
 		/// <remarks>Use this constructor if you wish to register an XMPP account using
 		/// the in-band account registration process supported by some servers.</remarks>
-		public XmppClient(string hostname, int port = 5222, bool tls = true,
+		public XmppClient(string domain, string hostname, int port = 5222, bool tls = true,
 			RemoteCertificateValidationCallback validate = null) {
-				im = new XmppIm(hostname, port, tls, validate);
+				im = new XmppIm(domain, hostname, port, tls, validate);
 				LoadExtensions();
 		}
 

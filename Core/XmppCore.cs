@@ -48,6 +48,10 @@ namespace S22.Xmpp.Core {
 		/// </summary>
 		string hostname;
 		/// <summary>
+		/// The domain of the XMPP server.
+		/// </summary>
+		string domain;
+		/// <summary>
 		/// The username with which to authenticate.
 		/// </summary>
 		string username;
@@ -108,6 +112,27 @@ namespace S22.Xmpp.Core {
 				hostname = value;
 			}
 		}
+
+		/// <summary>
+		/// The domain of the XMPP server; this will factor into TLS/SSL and stream info.
+		/// </summary>
+		/// <exception cref="ArgumentNullException">The Hostname property is being
+		/// set and the value is null.</exception>
+		/// <exception cref="ArgumentException">The Hostname property is being set
+		/// and the value is the empty string.</exception>
+		public string Domain
+		{
+			get
+			{
+				return domain;
+			}
+			set
+			{
+				value.ThrowIfNullOrEmpty("Domain");
+				domain = value;
+			}
+		}
+
 
 		/// <summary>
 		/// The port number of the XMPP service of the server.
@@ -253,8 +278,9 @@ namespace S22.Xmpp.Core {
 		/// parameter is the empty string.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">The value of the port parameter
 		/// is not a valid port number.</exception>
-		public XmppCore(string hostname, string username, string password,
+		public XmppCore(string domain, string hostname, string username, string password,
 			int port = 5222, bool tls = true, RemoteCertificateValidationCallback validate = null) {
+				Domain = domain;
 				Hostname = hostname;
 				Username = username;
 				Password = password;
@@ -279,8 +305,9 @@ namespace S22.Xmpp.Core {
 		/// string.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">The value of the port parameter
 		/// is not a valid port number.</exception>
-		public XmppCore(string hostname, int port = 5222, bool tls = true,
+		public XmppCore(string domain, string hostname, int port = 5222, bool tls = true,
 			RemoteCertificateValidationCallback validate = null) {
+			Domain = domain;
 			Hostname = hostname;
 			Port = port;
 			Tls = tls;
@@ -312,6 +339,11 @@ namespace S22.Xmpp.Core {
 			try {
 				client = new TcpClient(Hostname, Port);
 				stream = client.GetStream();
+				if (Tls) {
+					var sslStream = new SslStream(stream, false);
+					sslStream.AuthenticateAsClient(Domain);
+					stream = sslStream;
+				}
 				// Sets up the connection which includes TLS and possibly SASL negotiation.
 				SetupConnection(this.resource);
 				// We are connected.
@@ -699,14 +731,14 @@ namespace S22.Xmpp.Core {
 		/// turned off.</exception>
 		void SetupConnection(string resource = null) {
 			// Request the initial stream.
-			XmlElement feats = InitiateStream(Hostname);
+			XmlElement feats = InitiateStream(Domain);
 			// Server supports TLS/SSL via STARTTLS.
 			if (feats["starttls"] != null) {
 				// TLS is mandatory and user opted out of it.
 				if (feats["starttls"]["required"] != null && Tls == false)
 					throw new AuthenticationException("The server requires TLS/SSL.");
 				if(Tls)
-					feats = StartTls(Hostname, Validate);
+					feats = StartTls(Domain, Validate);
 			}
 			// If no Username has been provided, don't perform authentication.
 			if (Username == null)
@@ -723,7 +755,7 @@ namespace S22.Xmpp.Core {
 			}
 			// Continue with SASL authentication.
 			try {
-				feats = Authenticate(list, Username, Password, Hostname);
+				feats = Authenticate(list, Username, Password, Domain);
 				// FIXME: How is the client's JID constructed if the server does not support
 				// resource binding?
 				if (feats["bind"] != null)
@@ -919,6 +951,7 @@ namespace S22.Xmpp.Core {
 		/// <exception cref="IOException">There was a failure while writing to
 		/// the network.</exception>
 		void Send(string xml) {
+			Console.WriteLine($"Sent XML: {xml}");
 			xml.ThrowIfNull("xml");
 			// XMPP is guaranteed to be UTF-8.
 			byte[] buf = Encoding.UTF8.GetBytes(xml);

@@ -219,9 +219,9 @@ namespace S22.Xmpp.Im {
 		/// parameter is the empty string.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">The value of the port parameter
 		/// is not a valid port number.</exception>
-		public XmppIm(string hostname, string username, string password,
+		public XmppIm(string domain, string hostname, string username, string password,
 			int port = 5222, bool tls = true, RemoteCertificateValidationCallback validate = null) {
-				core = new XmppCore(hostname, username, password, port, tls, validate);
+				core = new XmppCore(domain, hostname, username, password, port, tls, validate);
 				SetupEventHandlers();
 		}
 
@@ -241,9 +241,9 @@ namespace S22.Xmpp.Im {
 		/// string.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">The value of the port parameter
 		/// is not a valid port number.</exception>
-		public XmppIm(string hostname, int port = 5222, bool tls = true,
+		public XmppIm(string domain, string hostname, int port = 5222, bool tls = true,
 			RemoteCertificateValidationCallback validate = null) {
-			core = new XmppCore(hostname, port, tls, validate);
+			core = new XmppCore(domain, hostname, port, tls, validate);
 			SetupEventHandlers();
 		}
 
