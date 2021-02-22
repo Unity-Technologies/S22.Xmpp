@@ -951,7 +951,6 @@ namespace S22.Xmpp.Core {
 		/// <exception cref="IOException">There was a failure while writing to
 		/// the network.</exception>
 		void Send(string xml) {
-			Console.WriteLine($"Sent XML: {xml}");
 			xml.ThrowIfNull("xml");
 			// XMPP is guaranteed to be UTF-8.
 			byte[] buf = Encoding.UTF8.GetBytes(xml);
